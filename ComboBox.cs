@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using HarmonyLib;
 using Lib;
 using System.Data;
+using System.Threading;
+using System.Drawing.Text;
 
 namespace BetterAuroraUI
 {
@@ -18,6 +20,9 @@ namespace BetterAuroraUI
     {
         static private bool disablePatch = false;
         static private DateTime lastPress;
+
+        static private System.Threading.Timer tacticalMapTimer;
+        static public ComboBox SystemNameCombo;
         public static void Postfix(ComboBox __instance, EventArgs e)
         {
             if (disablePatch)
@@ -28,27 +33,7 @@ namespace BetterAuroraUI
                     switch (__instance.Parent.Name)
                     {
                         case "SystemView":
-                            if (!Utils.ControlPress)
-                            {
-                                double timeDiff = (DateTime.Now - lastPress).TotalMilliseconds;
-                                if (timeDiff < 100)
-                                {
-                                    disablePatch = true;
-                                    string systemName = __instance.Text;
-                                    ComboBox tacticalSystemCombo = Utils.Find<ComboBox>(FormOnShowPatch.tacticalMap, "cboSystems", goUp: 1);
-                                    int index = tacticalSystemCombo.FindString(systemName);
-                                    if (index >= 0)
-                                    {
-                                        tacticalSystemCombo.SelectedIndex = index;
-                                        ((Form)__instance.Parent).Close();
-                                        FormOnShowPatch.tacticalMap.Focus();
-                                    }
-                                    disablePatch = false;
-                                } else
-                                {
-                                    lastPress = DateTime.Now;
-                                }
-                            }
+                            SystemNameCombo = __instance;
                             break;
                     }
                     break;

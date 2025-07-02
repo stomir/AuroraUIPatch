@@ -35,23 +35,38 @@ namespace BetterAuroraUI
                 case "TacticalMap":
                     tacticalMap = __instance;
                     break;
-                case "SystemView":
-                    //open system map with ctrl
-                    //if (Utils.ControlPress)
-                    //{
-                    //    string systemName = Utils.Find<ComboBox>(__instance, "cboSystems", goUp: 0).Text;
-                    //    MessageBox.Show($"system name {systemName}");
-                    //    ComboBox tacticalSystemCombo = Utils.Find<ComboBox>(tacticalMap, "cboSystems", goUp: 0);
-                    //    int index = tacticalSystemCombo.Items.IndexOf(systemName);
-                    //    MessageBox.Show($"index {index}");
-                    //    if (index >= 0)
-                    //    {
-                    //        tacticalSystemCombo.SelectedIndex = index;
-                    //        __instance.Close();
-                    //    }
-                    //}
+                case "FleetWindow":
+                    Utils.Find<CheckBox>(__instance, "chkIncludeCivilians").Checked = false;
                     break;
 
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Control))]
+    [HarmonyPatch("OnMouseDoubleClick")]
+    class FormOnDoubleClickPatch
+    {
+        public static DateTime lastGalMapDoubleClick;
+        public static void Prefix(Control __instance, EventArgs e)
+        {
+            if (__instance is Form form)
+            {
+                switch (__instance.Name)
+                {
+                    case "GalacticMap":
+                        string systemName = ComboBoxChangedPatch.SystemNameCombo.Text;
+                        ComboBox tacticalSystemCombo = Utils.Find<ComboBox>(FormOnShowPatch.tacticalMap, "cboSystems", goUp: 1);
+                        int index = tacticalSystemCombo.FindString(systemName);
+                        if (index >= 0)
+                        {
+                            tacticalSystemCombo.SelectedIndex = index;
+                            ((Form)ComboBoxChangedPatch.SystemNameCombo.Parent).Close();
+                            FormOnShowPatch.tacticalMap.Focus();
+                        }
+                        break;
+
+                }
             }
         }
     }
